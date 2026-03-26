@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Session Detail - EngageAI{% endblock %}
+{% block page_title %}Session: {{ session.title }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="custom-table">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">Engagement Records</h6>
+                <span class="badge" style="background:#ede9fe;color:#6366f1;">{{ records|length }} records</span>
+            </div>
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Student</th><th>Level</th><th>Confidence</th><th>Model</th><th>Time</th></tr></thead>
+                <tbody>
+                    {% for rec in records %}
+                    <tr>
+                        <td>{{ rec.student.get_full_name|default:rec.student.username }}</td>
+                        <td><span class="engagement-badge badge-{{ rec.engagement_level }}">{{ rec.get_engagement_level_display }}</span></td>
+                        <td>{{ rec.confidence_score|floatformat:3 }}</td>
+                        <td><span class="badge bg-light text-dark border" style="font-size:0.7rem;">{{ rec.model_used }}</span></td>
+                        <td class="text-muted" style="font-size:0.8rem;">{{ rec.timestamp|date:"H:i:s" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">No engagement records yet</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card mb-4">
+            <h6 class="fw-bold mb-3">Session Info</h6>
+            <div class="mb-2 d-flex justify-content-between" style="font-size:0.875rem;">
+                <span class="text-muted">Status</span>
+                <span class="badge {% if session.status == 'active' %}bg-success{% elif session.status == 'scheduled' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ session.get_status_display }}</span>
+            </div>
+            <div class="mb-2 d-flex justify-content-between" style="font-size:0.875rem;">
+                <span class="text-muted">Instructor</span>
+                <span class="fw-bold">{{ session.instructor.get_full_name|default:session.instructor.username }}</span>
+            </div>
+            <div class="mb-2 d-flex justify-content-between" style="font-size:0.875rem;">
+                <span class="text-muted">Start Time</span>
+                <span class="fw-bold">{{ session.start_time|date:"M d, Y H:i" }}</span>
+            </div>
+            <div class="d-flex justify-content-between" style="font-size:0.875rem;">
+                <span class="text-muted">Students</span>
+                <span class="fw-bold">{{ enrollments|length }} enrolled</span>
+            </div>
+            {% if user.role == 'student' %}
+            <a href="{% url 'sessions_app:join' session.pk %}" class="btn btn-primary w-100 mt-3">
+                <i class="bi bi-camera-video me-2"></i>Join & Monitor
+            </a>
+            {% endif %}
+        </div>
+        <div class="stat-card">
+            <h6 class="fw-bold mb-3">Enrolled Students</h6>
+            {% for enroll in enrollments %}
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#0ea5e9);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700;flex-shrink:0;">
+                    {{ enroll.student.first_name|first|default:enroll.student.username|first|upper }}
+                </div>
+                <div>
+                    <div style="font-size:0.875rem;font-weight:500;">{{ enroll.student.get_full_name|default:enroll.student.username }}</div>
+                    <small class="text-muted">Joined {{ enroll.enrolled_at|timesince }} ago</small>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted text-center py-2" style="font-size:0.875rem;">No students enrolled</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

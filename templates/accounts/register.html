@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Register - EngageAI{% endblock %}
+{% block auth_content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5"
+     style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="text-center mb-4">
+                    <div style="width:64px;height:64px;background:linear-gradient(135deg,#6366f1,#0ea5e9);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;">
+                        <i class="bi bi-cpu-fill text-white fs-3"></i>
+                    </div>
+                    <h3 style="color:#fff;font-weight:700;">Create Account</h3>
+                    <p style="color:#94a3b8;font-size:0.875rem;">Join the EngageAI Platform</p>
+                </div>
+                <div class="auth-card p-4">
+                    {% if form.errors %}
+                    <div class="alert alert-danger py-2" style="font-size:0.85rem;">
+                        Please fix the errors below.
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}<br>{{ field }}: {{ error }}{% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label fw-500" style="font-size:0.875rem;">First Name</label>
+                                <input type="text" name="first_name" class="form-control" placeholder="First name">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-500" style="font-size:0.875rem;">Last Name</label>
+                                <input type="text" name="last_name" class="form-control" placeholder="Last name">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-500" style="font-size:0.875rem;">Username</label>
+                                <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-500" style="font-size:0.875rem;">Email</label>
+                                <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-500" style="font-size:0.875rem;">Role</label>
+                                <select name="role" class="form-select">
+                                    <option value="student">Student</option>
+                                    <option value="instructor">Instructor</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-500" style="font-size:0.875rem;">Password</label>
+                                <input type="password" name="password1" class="form-control" placeholder="Create a password" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-500" style="font-size:0.875rem;">Confirm Password</label>
+                                <input type="password" name="password2" class="form-control" placeholder="Confirm your password" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-person-plus me-2"></i>Create Account
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <p class="text-center mt-3 mb-0" style="font-size:0.875rem;">
+                        Already have an account? <a href="{% url 'accounts:login' %}" class="text-primary fw-bold">Sign In</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

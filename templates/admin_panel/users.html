@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Users - EngageAI{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0" style="font-size:0.875rem;">{{ users|length }} total users registered</p>
+    <input type="text" id="searchInput" class="form-control" placeholder="Search users..." style="width:220px;" onkeyup="filterTable()">
+</div>
+<div class="custom-table">
+    <table class="table table-hover mb-0" id="usersTable">
+        <thead><tr><th>#</th><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th></tr></thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td class="text-muted">{{ forloop.counter }}</td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#0ea5e9);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:0.8rem;flex-shrink:0;">
+                            {{ u.first_name|first|default:u.username|first|upper }}
+                        </div>
+                        <span class="fw-500" style="font-size:0.875rem;">{{ u.get_full_name|default:u.username }}</span>
+                    </div>
+                </td>
+                <td style="font-size:0.875rem;">@{{ u.username }}</td>
+                <td style="font-size:0.875rem;">{{ u.email }}</td>
+                <td>
+                    <span class="badge py-1 px-2" style="border-radius:20px;font-size:0.75rem;{% if u.role == 'admin' %}background:#fee2e2;color:#b91c1c;{% elif u.role == 'instructor' %}background:#ede9fe;color:#6366f1;{% else %}background:#dbeafe;color:#1d4ed8;{% endif %}">
+                        {{ u.role|capfirst }}
+                    </span>
+                </td>
+                <td class="text-muted" style="font-size:0.8rem;">{{ u.date_joined|date:"M d, Y" }}</td>
+                <td>{% if u.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center text-muted py-5">No users found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function filterTable() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#usersTable tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(input) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

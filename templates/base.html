@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EngageAI{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --sidebar-width: 260px;
+        }
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #f8fafc; color: #334155; }
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar .logo { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar .logo h5 { color: #fff; font-weight: 700; margin: 0; font-size: 1.1rem; }
+        .sidebar .logo span { color: var(--primary); }
+        .sidebar .nav-link {
+            color: #94a3b8;
+            padding: 0.65rem 1.5rem;
+            border-radius: 8px;
+            margin: 2px 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(99,102,241,0.2);
+            color: #fff;
+        }
+        .sidebar .nav-link i { font-size: 1rem; width: 20px; }
+        .sidebar-section-title {
+            color: #475569;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 1rem 1.5rem 0.3rem;
+        }
+        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.85rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .topbar .page-title { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 0; }
+        .content-area { padding: 2rem 1.5rem; }
+        .stat-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .stat-card .icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .stat-card .stat-value { font-size: 2rem; font-weight: 700; color: #0f172a; line-height: 1; }
+        .stat-card .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 500; }
+        .custom-table { background: #fff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+        .custom-table table { margin: 0; }
+        .custom-table th { background: #f8fafc; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; border-bottom: 1px solid #e2e8f0; padding: 0.85rem 1rem; }
+        .custom-table td { font-size: 0.875rem; vertical-align: middle; border-color: #f1f5f9; padding: 0.75rem 1rem; }
+        .engagement-badge { padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-very_high { background: #dcfce7; color: #15803d; }
+        .badge-high { background: #dbeafe; color: #1d4ed8; }
+        .badge-low { background: #fef9c3; color: #a16207; }
+        .badge-very_low { background: #fee2e2; color: #b91c1c; }
+        .form-control, .form-select { border-radius: 10px; border: 1.5px solid #e2e8f0; padding: 0.6rem 1rem; font-size: 0.875rem; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+        .btn-primary { background: var(--primary); border-color: var(--primary); border-radius: 10px; font-weight: 600; padding: 0.6rem 1.4rem; }
+        .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+        .auth-card { background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="sidebar">
+    <div class="logo">
+        <h5><i class="bi bi-cpu-fill" style="color:var(--primary)"></i> Engage<span>AI</span></h5>
+        <small style="color:#64748b;font-size:0.75rem;">Student Engagement Detection</small>
+    </div>
+    <nav class="mt-3">
+        <div class="sidebar-section-title">Main</div>
+        <a href="{% url 'dashboard:home' %}" class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}">
+            <i class="bi bi-grid-1x2-fill"></i> Dashboard
+        </a>
+        <a href="{% url 'sessions_app:list' %}" class="nav-link {% if request.resolver_match.app_name == 'sessions_app' %}active{% endif %}">
+            <i class="bi bi-camera-video-fill"></i> Sessions
+        </a>
+        <a href="{% url 'dashboard:reports' %}" class="nav-link">
+            <i class="bi bi-bar-chart-fill"></i> My Reports
+        </a>
+        {% if user.role == 'admin' or user.role == 'instructor' %}
+        <div class="sidebar-section-title">Admin</div>
+        <a href="{% url 'admin_panel:dashboard' %}" class="nav-link {% if request.resolver_match.app_name == 'admin_panel' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i> Control Panel
+        </a>
+        <a href="{% url 'admin_panel:users' %}" class="nav-link">
+            <i class="bi bi-people-fill"></i> User Management
+        </a>
+        <a href="{% url 'admin_panel:analytics' %}" class="nav-link">
+            <i class="bi bi-graph-up"></i> Analytics
+        </a>
+        <a href="{% url 'admin_panel:model_config' %}" class="nav-link">
+            <i class="bi bi-gear-fill"></i> Model Config
+        </a>
+        {% endif %}
+        <div class="sidebar-section-title">Account</div>
+        <a href="{% url 'accounts:profile' %}" class="nav-link">
+            <i class="bi bi-person-fill"></i> Profile
+        </a>
+        <a href="{% url 'accounts:logout' %}" class="nav-link">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </nav>
+</div>
+<div class="main-content">
+    <div class="topbar">
+        <h6 class="page-title">{% block page_title %}Dashboard{% endblock %}</h6>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-light text-dark border">{{ user.role|capfirst }}</span>
+            <div class="d-flex align-items-center gap-2">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:0.8rem;">
+                    {{ user.first_name|first|default:user.username|first|upper }}
+                </div>
+                <span style="font-size:0.875rem;font-weight:500;">{{ user.get_full_name|default:user.username }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="content-area">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</div>
+{% else %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

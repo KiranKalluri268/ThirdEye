@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Reports - EngageAI{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+
+<!-- Summary Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-value">{{ total }}</div>
+                    <div class="stat-label mt-1">Total Records</div>
+                </div>
+                <div class="icon" style="background:#ede9fe;color:#6366f1;">
+                    <i class="bi bi-activity"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-value">{{ avg_confidence }}%</div>
+                    <div class="stat-label mt-1">Avg Confidence</div>
+                </div>
+                <div class="icon" style="background:#dcfce7;color:#16a34a;">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Records Table -->
+<div class="custom-table">
+    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0">{{ title }}</h6>
+        <span class="text-muted" style="font-size:0.85rem;">{{ total }} record{{ total|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th>Session</th>
+                {% if is_instructor %}<th>Student</th>{% endif %}
+                <th>Level</th>
+                <th>Confidence</th>
+                <th>Model</th>
+                <th>Date & Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rec in records %}
+            <tr>
+                <td class="fw-medium">{{ rec.session.title|truncatechars:30 }}</td>
+                {% if is_instructor %}
+                <td>{{ rec.student.get_full_name|default:rec.student.username }}</td>
+                {% endif %}
+                <td>
+                    <span class="engagement-badge badge-{{ rec.engagement_level }}">
+                        {{ rec.get_engagement_level_display }}
+                    </span>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="progress flex-grow-1" style="height:6px;width:80px;">
+                            <div class="progress-bar"
+                                 style="width:{{ rec.confidence_score_pct }}%;background:#6366f1;">
+                            </div>
+                        </div>
+                        <span style="font-size:0.8rem;">
+                            {% widthratio rec.confidence_score 1 100 %}%
+                        </span>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-light text-dark" style="font-size:0.75rem;">
+                        {{ rec.model_used|default:"opencv" }}
+                    </span>
+                </td>
+                <td class="text-muted" style="font-size:0.82rem;">
+                    {{ rec.timestamp|date:"d M Y" }}<br>
+                    <small>{{ rec.timestamp|time:"H:i:s" }}</small>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-5 text-muted">
+                    <i class="bi bi-camera-video d-block mb-2" style="font-size:2.5rem;"></i>
+                    <strong>No records yet</strong><br>
+                    <small>
+                        {% if is_instructor %}
+                        No students have joined your sessions yet.
+                        {% else %}
+                        Join a session and start camera monitoring to see records here.
+                        {% endif %}
+                    </small>
+                    <br><br>
+                    <a href="{% url 'sessions_app:list' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-camera-video me-1"></i>Go to Sessions
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

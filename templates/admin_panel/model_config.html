@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Model Config - EngageAI{% endblock %}
+{% block page_title %}Model Configuration{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="stat-card">
+            <h6 class="fw-bold mb-4">Trained Models</h6>
+            {% if model_files %}
+            <div class="list-group list-group-flush">
+                {% for f in model_files %}
+                <div class="list-group-item d-flex align-items-center gap-3 px-0">
+                    <div style="width:40px;height:40px;border-radius:10px;background:#ede9fe;color:#6366f1;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold" style="font-size:0.875rem;">{{ f }}</div>
+                        <small class="text-muted">Keras Model File</small>
+                    </div>
+                    <span class="badge bg-success">Ready</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-cpu text-muted" style="font-size:3rem;"></i>
+                <h6 class="mt-3 text-muted">No models trained yet</h6>
+                <p class="text-muted" style="font-size:0.875rem;">Run the commands below to train models</p>
+                <div class="bg-light p-3 rounded mt-3 text-start" style="font-size:0.8rem;font-family:monospace;">
+                    python ml_engine/generate_dataset.py<br>
+                    python ml_engine/train_models.py
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card mb-4">
+            <h6 class="fw-bold mb-3">Model Accuracies</h6>
+            {% for label, val, color in accuracy_bars %}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem;">
+                    <span>{{ label }}</span><span class="fw-bold">{{ val }}%</span>
+                </div>
+                <div class="progress" style="height:6px;border-radius:3px;">
+                    <div class="progress-bar" style="width:{{ val }}%;background:{{ color }};"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="stat-card">
+            <h6 class="fw-bold mb-3">Quick Actions</h6>
+            <div class="d-grid gap-2">
+                <button class="btn btn-outline-primary btn-sm" onclick="alert('Run: python ml_engine/train_models.py')">
+                    <i class="bi bi-arrow-repeat me-2"></i>Retrain Models
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="alert('Run: python ml_engine/generate_dataset.py')">
+                    <i class="bi bi-database me-2"></i>Regenerate Dataset
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

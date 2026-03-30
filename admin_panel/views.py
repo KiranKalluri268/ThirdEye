@@ -8,7 +8,7 @@ from django.conf import settings
 
 def admin_required(view_func):
     def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role not in ['admin', 'instructor']:
+        if not request.user.is_authenticated or request.user.role != 'admin':
             return redirect('accounts:login')
         return view_func(request, *args, **kwargs)
     return wrapper

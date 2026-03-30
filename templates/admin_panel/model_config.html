@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Model Config - EngageAI{% endblock %}
+{% block title %}Model Config - ThirdEyeAI{% endblock %}
 {% block page_title %}Model Configuration{% endblock %}
 {% block content %}
 <div class="row g-4">
@@ -43,7 +43,7 @@
                     <span>{{ label }}</span><span class="fw-bold">{{ val }}%</span>
                 </div>
                 <div class="progress" style="height:6px;border-radius:3px;">
-                    <div class="progress-bar" style="width:{{ val }}%;background:{{ color }};"></div>
+                    <div class="progress-bar" data-width="{{ val }}%" data-color="{{ color }}"></div>
                 </div>
             </div>
             {% endfor %}

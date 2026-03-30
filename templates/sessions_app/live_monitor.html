@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Live Monitor - EngageAI{% endblock %}
+{% block title %}Live Monitor - ThirdEyeAI{% endblock %}
 {% block page_title %}Live Session: {{ session.title }}{% endblock %}
 {% block content %}
 <div class="row g-4">
@@ -116,10 +116,11 @@
 {% endblock %}
 
 {% block extra_js %}
+<div id="session-metadata" data-session-id="{{ session.id }}" style="display:none;"></div>
 <script>
 let stream = null, intervalId = null, timerIntervalId = null;
 let analysisCount = 0, probChart = null, secondsElapsed = 0;
-const SESSION_ID = {{ session.id }};
+const SESSION_ID = parseInt(document.getElementById('session-metadata').dataset.sessionId);
 
 const ICONS = {
     very_low: '😴', low: '😑', high: '🙂', very_high: '😊'

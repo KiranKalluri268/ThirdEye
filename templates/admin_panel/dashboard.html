@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Admin Dashboard - EngageAI{% endblock %}
+{% block title %}Admin Dashboard - ThirdEyeAI{% endblock %}
 {% block page_title %}Control Panel{% endblock %}
 {% block content %}
 <div class="row g-4 mb-4">
@@ -68,25 +68,65 @@
         </tbody>
     </table>
 </div>
+<!-- Data for Charts -->
+<div id="chart-data" 
+     data-labels='["Very Low", "Low", "High", "Very High"]' 
+     data-stats='{{ engagement_stats|safe }}' 
+     style="display:none;"></div>
 {% endblock %}
 {% block extra_js %}
 <script>
-const distData = {{ dist_data|safe }};
-new Chart(document.getElementById('distChart').getContext('2d'), {
-    type: 'pie',
-    data: {
-        labels: ['Very Low', 'Low', 'High', 'Very High'],
-        datasets: [{ data: [distData.very_low||0, distData.low||0, distData.high||0, distData.very_high||0], backgroundColor: ['#fee2e2','#fef9c3','#dbeafe','#dcfce7'], borderColor: ['#ef4444','#f59e0b','#3b82f6','#10b981'], borderWidth: 2 }]
-    },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-});
-new Chart(document.getElementById('modelChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-        labels: ['1D CNN', '1D ResNet', 'CNN Bagging', 'ResNet Bagging', 'Hybrid'],
-        datasets: [{ label: 'Accuracy (%)', data: [90, 90.25, 93.25, 93.75, 94.25], backgroundColor: ['#e0e7ff','#dbeafe','#c7d2fe','#bfdbfe','#6366f1'], borderColor: '#6366f1', borderWidth: 2, borderRadius: 8 }]
-    },
-    options: { responsive: true, scales: { y: { min: 85, max: 96 } }, plugins: { legend: { display: false } } }
-});
+    const dataEl = document.getElementById('chart-data');
+    if (dataEl) {
+        const chartLabels = JSON.parse(dataEl.dataset.labels);
+        const chartData = JSON.parse(dataEl.dataset.stats);
+        
+        // Overall Engagement Chart
+        const ctx = document.getElementById('overallEngagementChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    data: [
+                        chartData.very_low || 0,
+                        chartData.low || 0,
+                        chartData.high || 0,
+                        chartData.very_high || 0
+                    ],
+                    backgroundColor: ['#fee2e2','#fef9c3','#dbeafe','#dcfce7'],
+                    borderColor: ['#ef4444','#f59e0b','#3b82f6','#10b981'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+                cutout: '65%'
+            }
+        });
+
+        // Model Performance Chart (Static Data)
+        const modelCtx = document.getElementById('modelPerformanceChart').getContext('2d');
+        new Chart(modelCtx, {
+            type: 'bar',
+            data: {
+                labels: ['1D CNN', '1D ResNet', 'CNN Bagging', 'ResNet Bagging', 'Hybrid'],
+                datasets: [{
+                    label: 'Accuracy (%)',
+                    data: [90, 90.25, 93.25, 93.75, 94.25],
+                    backgroundColor: ['#e0e7ff','#dbeafe','#c7d2fe','#bfdbfe','#6366f1'],
+                    borderColor: '#6366f1',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true, max: 100 } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
 </script>
 {% endblock %}

@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Users - EngageAI{% endblock %}
+{% block title %}Users - ThirdEyeAI{% endblock %}
 {% block page_title %}User Management{% endblock %}
+{% block extra_css %}
+<style>
+    .badge-admin { background: #fee2e2; color: #b91c1c; }
+    .badge-instructor { background: #ede9fe; color: #6366f1; }
+    .badge-student { background: #dbeafe; color: #1d4ed8; }
+</style>
+{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <p class="text-muted mb-0" style="font-size:0.875rem;">{{ users|length }} total users registered</p>
@@ -24,7 +31,7 @@
                 <td style="font-size:0.875rem;">@{{ u.username }}</td>
                 <td style="font-size:0.875rem;">{{ u.email }}</td>
                 <td>
-                    <span class="badge py-1 px-2" style="border-radius:20px;font-size:0.75rem;{% if u.role == 'admin' %}background:#fee2e2;color:#b91c1c;{% elif u.role == 'instructor' %}background:#ede9fe;color:#6366f1;{% else %}background:#dbeafe;color:#1d4ed8;{% endif %}">
+                    <span class="badge py-1 px-2 badge-{{ u.role }}" style="border-radius:20px;font-size:0.75rem;">
                         {{ u.role|capfirst }}
                     </span>
                 </td>

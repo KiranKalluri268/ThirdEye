@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Session Detail - EngageAI{% endblock %}
+{% block title %}Session Detail - ThirdEyeAI{% endblock %}
 {% block page_title %}Session: {{ session.title }}{% endblock %}
 {% block content %}
 <div class="row g-4">
@@ -32,7 +32,7 @@
             <h6 class="fw-bold mb-3">Session Info</h6>
             <div class="mb-2 d-flex justify-content-between" style="font-size:0.875rem;">
                 <span class="text-muted">Status</span>
-                <span class="badge {% if session.status == 'active' %}bg-success{% elif session.status == 'scheduled' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ session.get_status_display }}</span>
+                <span class="badge {% if session.status == 'active' %}bg-success{% elif session.status == 'scheduled' %}bg-warning text-dark{% elif session.status == 'expired' %}bg-danger text-white{% else %}bg-secondary{% endif %}">{{ session.get_status_display }}</span>
             </div>
             <div class="mb-2 d-flex justify-content-between" style="font-size:0.875rem;">
                 <span class="text-muted">Instructor</span>
@@ -42,14 +42,44 @@
                 <span class="text-muted">Start Time</span>
                 <span class="fw-bold">{{ session.start_time|date:"M d, Y H:i" }}</span>
             </div>
+            <div class="mb-2 d-flex justify-content-between" style="font-size:0.875rem;">
+                <span class="text-muted">Duration</span>
+                <span class="fw-bold"><i class="bi bi-clock me-1"></i>{{ session.duration_minutes }} mins</span>
+            </div>
             <div class="d-flex justify-content-between" style="font-size:0.875rem;">
                 <span class="text-muted">Students</span>
                 <span class="fw-bold">{{ enrollments|length }} enrolled</span>
             </div>
             {% if user.role == 'student' %}
-            <a href="{% url 'sessions_app:join' session.pk %}" class="btn btn-primary w-100 mt-3">
-                <i class="bi bi-camera-video me-2"></i>Join & Monitor
-            </a>
+                {% if session.status == 'active' %}
+                <a href="{% url 'sessions_app:join' session.pk %}" class="btn btn-primary w-100 mt-3">
+                    <i class="bi bi-camera-video me-2"></i>Join & Monitor
+                </a>
+                {% elif session.status == 'scheduled' %}
+                <div class="alert alert-info mt-3 py-2 text-center" style="font-size:0.85rem;">
+                    <i class="bi bi-info-circle me-1"></i> Waiting for instructor to start
+                </div>
+                {% else %}
+                <div class="alert alert-secondary mt-3 py-2 text-center" style="font-size:0.85rem;">
+                    <i class="bi bi-lock-fill me-1"></i> Session Closed
+                </div>
+                {% endif %}
+            {% elif user == session.instructor or user.role == 'admin' %}
+                {% if session.status == 'scheduled' %}
+                <form action="{% url 'sessions_app:start' session.pk %}" method="POST" class="mt-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-play-fill me-1"></i> Start Session
+                    </button>
+                </form>
+                {% elif session.status == 'active' %}
+                <form action="{% url 'sessions_app:end' session.pk %}" method="POST" class="mt-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger w-100">
+                        <i class="bi bi-stop-fill me-1"></i> End Session
+                    </button>
+                </form>
+                {% endif %}
             {% endif %}
         </div>
         <div class="stat-card">

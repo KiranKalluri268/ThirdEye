@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Sessions - EngageAI{% endblock %}
+{% block title %}Sessions - ThirdEyeAI{% endblock %}
 {% block page_title %}Learning Sessions{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -15,7 +15,7 @@
     <div class="col-md-4">
         <div class="stat-card h-100">
             <div class="d-flex justify-content-between align-items-start mb-3">
-                <span class="badge {% if session.status == 'active' %}bg-success{% elif session.status == 'scheduled' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                <span class="badge {% if session.status == 'active' %}bg-success{% elif session.status == 'scheduled' %}bg-warning text-dark{% elif session.status == 'expired' %}bg-danger text-white{% else %}bg-secondary{% endif %}" style="font-size:0.7rem;">
                     {{ session.get_status_display }}
                 </span>
                 <small class="text-muted">{{ session.start_time|date:"M d, Y" }}</small>
@@ -24,10 +24,14 @@
             <p class="text-muted mb-3" style="font-size:0.8rem;">{{ session.description|truncatechars:80 }}</p>
             <div class="d-flex justify-content-between align-items-center">
                 <small class="text-muted"><i class="bi bi-person me-1"></i>{{ session.instructor.get_full_name|default:session.instructor.username }}</small>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 align-items-center">
                     <a href="{% url 'sessions_app:detail' session.pk %}" class="btn btn-sm btn-outline-primary">Details</a>
                     {% if user.role == 'student' %}
-                    <a href="{% url 'sessions_app:join' session.pk %}" class="btn btn-sm btn-primary">Join</a>
+                        {% if session.status == 'active' %}
+                        <a href="{% url 'sessions_app:join' session.pk %}" class="btn btn-sm btn-primary">Join</a>
+                        {% elif session.status == 'scheduled' %}
+                        <small class="text-muted"><i class="bi bi-clock me-1"></i>Scheduled</small>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

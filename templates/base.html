@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}EngageAI{% endblock %}</title>
+    <title>{% block title %}ThirdEyeAI{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -108,37 +108,37 @@
 {% if user.is_authenticated %}
 <div class="sidebar">
     <div class="logo">
-        <h5><i class="bi bi-cpu-fill" style="color:var(--primary)"></i> Engage<span>AI</span></h5>
+        <h5><i class="bi bi-cpu-fill" style="color:var(--primary)"></i> ThirdEye<span>AI</span></h5>
         <small style="color:#64748b;font-size:0.75rem;">Student Engagement Detection</small>
     </div>
     <nav class="mt-3">
         <div class="sidebar-section-title">Main</div>
-        <a href="{% url 'dashboard:home' %}" class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}">
+        <a href="{% url 'dashboard:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
             <i class="bi bi-grid-1x2-fill"></i> Dashboard
         </a>
         <a href="{% url 'sessions_app:list' %}" class="nav-link {% if request.resolver_match.app_name == 'sessions_app' %}active{% endif %}">
             <i class="bi bi-camera-video-fill"></i> Sessions
         </a>
-        <a href="{% url 'dashboard:reports' %}" class="nav-link">
+        <a href="{% url 'dashboard:reports' %}" class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
             <i class="bi bi-bar-chart-fill"></i> My Reports
         </a>
-        {% if user.role == 'admin' or user.role == 'instructor' %}
+        {% if user.role == 'admin' %}
         <div class="sidebar-section-title">Admin</div>
-        <a href="{% url 'admin_panel:dashboard' %}" class="nav-link {% if request.resolver_match.app_name == 'admin_panel' %}active{% endif %}">
+        <a href="{% url 'admin_panel:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.app_name == 'admin_panel' %}active{% endif %}">
             <i class="bi bi-speedometer2"></i> Control Panel
         </a>
-        <a href="{% url 'admin_panel:users' %}" class="nav-link">
+        <a href="{% url 'admin_panel:users' %}" class="nav-link {% if request.resolver_match.url_name == 'users' %}active{% endif %}">
             <i class="bi bi-people-fill"></i> User Management
         </a>
-        <a href="{% url 'admin_panel:analytics' %}" class="nav-link">
+        <a href="{% url 'admin_panel:analytics' %}" class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
             <i class="bi bi-graph-up"></i> Analytics
         </a>
-        <a href="{% url 'admin_panel:model_config' %}" class="nav-link">
+        <a href="{% url 'admin_panel:model_config' %}" class="nav-link {% if request.resolver_match.url_name == 'model_config' %}active{% endif %}">
             <i class="bi bi-gear-fill"></i> Model Config
         </a>
         {% endif %}
         <div class="sidebar-section-title">Account</div>
-        <a href="{% url 'accounts:profile' %}" class="nav-link">
+        <a href="{% url 'accounts:profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
             <i class="bi bi-person-fill"></i> Profile
         </a>
         <a href="{% url 'accounts:logout' %}" class="nav-link">
@@ -174,8 +174,19 @@
 {% else %}
 {% block auth_content %}{% endblock %}
 {% endif %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-{% block extra_js %}{% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Global helper to apply widths and colors from data attributes (fixes CSS linter issues)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('[data-width]').forEach(function(el) {
+                el.style.width = el.getAttribute('data-width');
+            });
+            document.querySelectorAll('[data-color]').forEach(function(el) {
+                el.style.background = el.getAttribute('data-color');
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -1,6 +1,6 @@
 ```markdown
 
-\# ThirdEye — Student Engagement Detection System
+\# ThirdEyeAI — Student Engagement Detection System
 
 A real-time AI-powered student engagement detection web application built with Django,
 

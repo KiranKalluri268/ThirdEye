@@ -1,7 +1,43 @@
 {% extends 'base.html' %}
-{% block title %}Reports - EngageAI{% endblock %}
+{% block title %}{{ title }} - ThirdEyeAI{% endblock %}
 {% block page_title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pb-green { background: #10b981; height: 6px; }
+    .pb-indigo { background: #6366f1; height: 6px; }
+    .prog-bar-dyn { transition: width 0.4s ease; }
+</style>
+{% endblock %}
+
 {% block content %}
+<!-- Header with Back Button -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">
+            {{ title }}
+            {% if is_admin and selected_session %}
+            <span class="text-muted fw-normal" style="font-size: 0.9rem;">
+                (by {{ selected_session.instructor.get_full_name|default:selected_session.instructor.username }})
+            </span>
+            {% endif %}
+        </h4>
+        <p class="text-muted small mb-0">
+            {% if selected_session %}
+            Detailed engagement data for session held on {{ selected_session.start_time|date:"d M Y" }}
+            {% elif sessions %}
+            Summary of all your teaching sessions
+            {% else %}
+            Your personal engagement history
+            {% endif %}
+        </p>
+    </div>
+    {% if selected_session %}
+    <a href="{% url 'dashboard:reports' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Back to Sessions
+    </a>
+    {% endif %}
+</div>
 
 <!-- Summary Stats -->
 <div class="row g-4 mb-4">
@@ -10,14 +46,15 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="stat-value">{{ total }}</div>
-                    <div class="stat-label mt-1">Total Records</div>
+                    <div class="stat-label mt-1">{% if sessions %}Total Sessions{% else %}Total Records{% endif %}</div>
                 </div>
                 <div class="icon" style="background:#ede9fe;color:#6366f1;">
-                    <i class="bi bi-activity"></i>
+                    <i class="bi bi-{% if sessions %}camera-video{% else %}activity{% endif %}"></i>
                 </div>
             </div>
         </div>
     </div>
+    {% if records %}
     <div class="col-md-3">
         <div class="stat-card">
             <div class="d-flex justify-content-between align-items-start">
@@ -31,81 +68,152 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
-<!-- Records Table -->
+<!-- Main Table Area -->
 <div class="custom-table">
-    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-        <h6 class="fw-bold mb-0">{{ title }}</h6>
-        <span class="text-muted" style="font-size:0.85rem;">{{ total }} record{{ total|pluralize }}</span>
-    </div>
     <div class="table-responsive">
-    <table class="table table-hover mb-0">
-        <thead>
-            <tr>
-                <th>Session</th>
-                {% if is_instructor %}<th>Student</th>{% endif %}
-                <th>Level</th>
-                <th>Confidence</th>
-                <th>Model</th>
-                <th>Date & Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for rec in records %}
-            <tr>
-                <td class="fw-medium">{{ rec.session.title|truncatechars:30 }}</td>
-                {% if is_instructor %}
-                <td>{{ rec.student.get_full_name|default:rec.student.username }}</td>
-                {% endif %}
-                <td>
-                    <span class="engagement-badge badge-{{ rec.engagement_level }}">
-                        {{ rec.get_engagement_level_display }}
-                    </span>
-                </td>
-                <td>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="progress flex-grow-1" style="height:6px;width:80px;">
-                            <div class="progress-bar"
-                                 style="width:{{ rec.confidence_score_pct }}%;background:#6366f1;">
-                            </div>
-                        </div>
-                        <span style="font-size:0.8rem;">
-                            {% widthratio rec.confidence_score 1 100 %}%
-                        </span>
-                    </div>
-                </td>
-                <td>
-                    <span class="badge bg-light text-dark" style="font-size:0.75rem;">
-                        {{ rec.model_used|default:"opencv" }}
-                    </span>
-                </td>
-                <td class="text-muted" style="font-size:0.82rem;">
-                    {{ rec.timestamp|date:"d M Y" }}<br>
-                    <small>{{ rec.timestamp|time:"H:i:s" }}</small>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center py-5 text-muted">
-                    <i class="bi bi-camera-video d-block mb-2" style="font-size:2.5rem;"></i>
-                    <strong>No records yet</strong><br>
-                    <small>
-                        {% if is_instructor %}
-                        No students have joined your sessions yet.
+        {% if sessions %}
+        <!-- Sessions List Table (Instructor Main View) -->
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Session</th>
+                    {% if is_admin %}<th>Instructor</th>{% endif %}
+                    <th class="text-center">Students</th>
+                    <th>Avg Engagement</th>
+                    <th>Avg Confidence</th>
+                    <th>Date & Time</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sess in sessions %}
+                <tr>
+                    <td class="fw-bold text-primary">{{ sess.title }}</td>
+                    {% if is_admin %}
+                    <td>
+                        <div class="small fw-medium">{{ sess.instructor.get_full_name|default:sess.instructor.username }}</div>
+                    </td>
+                    {% endif %}
+                    <td class="text-center">
+                        <span class="badge bg-light text-dark">{{ sess.student_count }}</span>
+                    </td>
+                    <td>
+                        {% if sess.avg_level_num %}
+                            {% if sess.avg_level_num >= 3.5 %}<span class="badge-very_high engagement-badge">Very High</span>
+                            {% elif sess.avg_level_num >= 2.5 %}<span class="badge-high engagement-badge">High</span>
+                            {% elif sess.avg_level_num >= 1.5 %}<span class="badge-low engagement-badge">Low</span>
+                            {% else %}<span class="badge-very_low engagement-badge">Very Low</span>
+                            {% endif %}
                         {% else %}
-                        Join a session and start camera monitoring to see records here.
+                            <span class="text-muted small">No data</span>
                         {% endif %}
-                    </small>
-                    <br><br>
-                    <a href="{% url 'sessions_app:list' %}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-camera-video me-1"></i>Go to Sessions
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    </td>
+                    <td>
+                        {% if sess.avg_conf %}
+                        {% widthratio sess.avg_conf 1 100 as conf_pct %}
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="height:6px;width:60px;">
+                                <div class="progress-bar pb-green prog-bar-dyn" role="progressbar"
+                                     data-width="{{ conf_pct }}"></div>
+                            </div>
+                            <span class="small">{{ conf_pct }}%</span>
+                        </div>
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>
+                        <div class="small">
+                            {{ sess.start_time|date:"d M Y" }}<br>
+                            <span class="text-muted">{{ sess.start_time|time:"H:i" }}</span>
+                        </div>
+                    </td>
+                    <td class="text-end">
+                        <a href="?session_id={{ sess.id }}" class="btn btn-primary btn-sm">
+                            View Records <i class="bi bi-chevron-right ms-1"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x d-block mb-2" style="font-size:2rem;"></i>
+                        No sessions found. Create a session to see reports.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% elif records %}
+        <!-- Records Table (Student View or Instructor Detail View) -->
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    {% if not selected_session %}<th>Session</th>{% endif %}
+                    {% if is_instructor or is_admin %}<th>Student</th>{% endif %}
+                    <th>Level</th>
+                    <th>Confidence</th>
+                    <th>Model</th>
+                    <th>Date & Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rec in records %}
+                <tr>
+                    {% if not selected_session %}
+                    <td class="fw-medium">{{ rec.session.title|truncatechars:25 }}</td>
+                    {% endif %}
+                    {% if is_instructor or is_admin %}
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width:24px;height:24px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;">
+                                {{ rec.student.username|first|upper }}
+                            </div>
+                            {{ rec.student.get_full_name|default:rec.student.username }}
+                        </div>
+                    </td>
+                    {% endif %}
+                    <td>
+                        <span class="engagement-badge badge-{{ rec.engagement_level }}">
+                            {{ rec.get_engagement_level_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% widthratio rec.confidence_score 1 100 as rec_conf_pct %}
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="height:6px;width:70px;">
+                                <div class="progress-bar pb-indigo prog-bar-dyn" role="progressbar"
+                                     data-width="{{ rec_conf_pct }}"></div>
+                            </div>
+                            <span class="small">{{ rec_conf_pct }}%</span>
+                        </div>
+                    </td>
+                    <td><span class="badge bg-light text-dark font-monospace" style="font-size:0.7rem;">{{ rec.model_used }}</span></td>
+                    <td class="text-muted small">
+                        {{ rec.timestamp|date:"d M Y" }}<br>
+                        {{ rec.timestamp|time:"H:i:s" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        No engagement records available for this view.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('[data-width]').forEach(function(el) {
+        el.style.width = el.getAttribute('data-width') + '%';
+    });
+</script>
 {% endblock %}
